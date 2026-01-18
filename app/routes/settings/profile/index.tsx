@@ -16,7 +16,6 @@ import { authSessionStorage } from '#app/utils/session.server.ts'
 import { redirectWithToast } from '#app/utils/toast.server.ts'
 import { NameSchema, UsernameSchema } from '#app/utils/user-validation.ts'
 import { type Route } from './+types/index.ts'
-import { twoFAVerificationType } from './two-factor/_layout.tsx'
 
 export const handle: SEOHandle = {
 	getSitemapEntries: () => null,
@@ -29,43 +28,11 @@ const ProfileFormSchema = z.object({
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
-	const user = await prisma.user.findUniqueOrThrow({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			email: true,
-			image: {
-				select: { objectKey: true },
-			},
-			_count: {
-				select: {
-					sessions: {
-						where: {
-							expirationDate: { gt: new Date() },
-						},
-					},
-				},
-			},
-		},
-	})
 
-	const twoFactorVerification = await prisma.verification.findUnique({
-		select: { id: true },
-		where: { target_type: { type: twoFAVerificationType, target: userId } },
-	})
 
-	const password = await prisma.password.findUnique({
-		select: { userId: true },
-		where: { userId },
-	})
 
-	return {
-		user,
-		hasPassword: Boolean(password),
-		isTwoFactorEnabled: Boolean(twoFactorVerification),
-	}
+
+	return null
 }
 
 type ProfileActionArgs = {
@@ -287,12 +254,6 @@ async function signOutOfSessionsAction({ request, userId }: ProfileActionArgs) {
 		sessionId,
 		'You must be authenticated to sign out of other sessions',
 	)
-	await prisma.session.deleteMany({
-		where: {
-			userId,
-			id: { not: sessionId },
-		},
-	})
 	return { status: 'success' } as const
 }
 

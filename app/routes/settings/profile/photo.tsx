@@ -1,6 +1,5 @@
 import { getFormProps, getInputProps, useForm } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod'
-import { invariantResponse } from '@epic-web/invariant'
 import { parseFormData } from '@mjackson/form-data-parser'
 import { type SEOHandle } from '@nasa-gcn/remix-seo'
 import { useState } from 'react'
@@ -50,17 +49,8 @@ const PhotoFormSchema = z.discriminatedUnion('intent', [
 
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
-	const user = await prisma.user.findUnique({
-		where: { id: userId },
-		select: {
-			id: true,
-			name: true,
-			username: true,
-			image: { select: { objectKey: true } },
-		},
-	})
-	invariantResponse(user, 'User not found', { status: 404 })
-	return { user }
+
+	return userId
 }
 
 export async function action({ request }: Route.ActionArgs) {

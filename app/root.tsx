@@ -76,30 +76,8 @@ export async function loader({ request }: Route.LoaderArgs) {
 		desc: 'getUserId in root',
 	})
 
-	const user = userId
-		? await time(
-				() =>
-					prisma.user.findUnique({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							image: { select: { objectKey: true } },
-							roles: {
-								select: {
-									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
-									},
-								},
-							},
-						},
-						where: { id: userId },
-					}),
-				{ timings, type: 'find user', desc: 'find user in root' },
-			)
-		: null
-	if (userId && !user) {
+
+	if (userId ) {
 		console.info('something weird happened')
 		// something weird happened... The user is authenticated but we can't find
 		// them in the database. Maybe they were deleted? Let's log them out.
@@ -110,7 +88,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 	return data(
 		{
-			user,
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),

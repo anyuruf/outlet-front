@@ -6,24 +6,5 @@ import { type Route } from './+types/download-user-data.ts'
 export async function loader({ request }: Route.LoaderArgs) {
 	const userId = await requireUserId(request)
 
-	const domain = getDomainUrl(request)
-
-	return Response.json({
-		user: {
-			...user,
-			image: user.image
-				? {
-						...user.image,
-						url: domain + getUserImgSrc(user.image.objectKey),
-					}
-				: null,
-			notes: user.notes.map((note) => ({
-				...note,
-				images: note.images.map((image) => ({
-					...image,
-					url: domain + getNoteImgSrc(image.objectKey),
-				})),
-			})),
-		},
-	})
+	return null
 }
