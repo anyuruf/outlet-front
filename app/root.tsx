@@ -10,36 +10,34 @@ import {
 	useLoaderData,
 	useMatches,
 } from 'react-router'
-import { HoneypotProvider } from 'remix-utils/honeypot/react'
-import { type Route } from './+types/root.ts'
-import appleTouchIconAssetUrl from './assets/favicons/apple-touch-icon.png'
-import faviconAssetUrl from './assets/favicons/favicon.svg'
-import { GeneralErrorBoundary } from './components/error-boundary.tsx'
-import { EpicProgress } from './components/progress-bar.tsx'
-import { SearchBar } from './components/search-bar.tsx'
-import { useToast } from './components/toaster.tsx'
-import { Button } from './components/ui/button.tsx'
-import { href as iconsHref } from './components/ui/icon.tsx'
-import { EpicToaster } from './components/ui/sonner.tsx'
-import { UserDropdown } from './components/user-dropdown.tsx'
 import {
-	ThemeSwitch,
-	useOptionalTheme,
-	useTheme,
-} from './routes/resources/theme-switch.tsx'
-import tailwindStyleSheetUrl from './styles/tailwind.css?url'
-import { getUserId, logout } from './utils/auth.server.ts'
-import { ClientHintCheck, getHints } from './utils/client-hints.tsx'
-import { prisma } from './utils/db.server.ts'
-import { getEnv } from './utils/env.server.ts'
-import { pipeHeaders } from './utils/headers.server.ts'
-import { honeypot } from './utils/honeypot.server.ts'
-import { combineHeaders, getDomainUrl, getImgSrc } from './utils/misc.tsx'
-import { useNonce } from './utils/nonce-provider.ts'
-import { type Theme, getTheme } from './utils/theme.server.ts'
-import { makeTimings, time } from './utils/timing.server.ts'
-import { getToast } from './utils/toast.server.ts'
-import { useOptionalUser } from './utils/user.ts'
+	FacebookIcon,
+	InstagramIcon,
+	LinkedinIcon,
+	TwitterIcon,
+} from 'lucide-react'
+import { type Route } from './+types/root.ts'
+import { GeneralErrorBoundary } from '@/components/error-boundary.tsx'
+import { EpicProgress } from './components/progress-bar.tsx'
+import { SearchBar } from '@/components/search-bar.tsx'
+import { useToast } from '@/components/toaster.tsx'
+import { href as iconsHref } from '@/components/ui/icon.tsx'
+import { EpicToaster } from '@/components/ui/sonner.tsx'
+import { Sidebar, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar'
+import { AppHeader } from '@/components/headers/AppHeader'
+import OutletLogoSVG from '@/components/headers/OutletLogoSVG'
+import { ClientHintCheck, getHints } from '@/utils/client-hints.tsx'
+import { getEnv } from '@/utils/env.server.ts'
+import { pipeHeaders } from '@/utils/headers.server.ts'
+import { combineHeaders, getDomainUrl, getImgSrc } from '@/utils/misc.tsx'
+import { type Theme, getTheme } from '@/utils/theme.server.ts'
+import { getToast } from '@/utils/toast.server.ts'
+import { useOptionalUser } from '@/utils/user.ts'
+import { authMiddleware, userContext } from "@/middleware/auth";
+import React from "react";
+
+
+export  const  middleware: Route.MiddlewareFunction[] = [authMiddleware];
 
 export const links: Route.LinksFunction = () => {
 	return [
@@ -49,64 +47,20 @@ export const links: Route.LinksFunction = () => {
 			rel: 'icon',
 			href: '/favicon.ico',
 			sizes: '48x48',
-		},
-		{ rel: 'icon', type: 'image/svg+xml', href: faviconAssetUrl },
-		{ rel: 'apple-touch-icon', href: appleTouchIconAssetUrl },
-		{
-			rel: 'manifest',
-			href: '/site.webmanifest',
-			crossOrigin: 'use-credentials',
-		} as const, // necessary to make typescript happy
-		{ rel: 'stylesheet', href: tailwindStyleSheetUrl },
+		}
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = ({ data }) => {
+export const meta: Route.MetaFunction = () => {
 	return [
-		{ title: data ? 'Epic Notes' : 'Error | Epic Notes' },
-		{ name: 'description', content: `Your own captain's log` },
+		{ title: 'Outlet iCommerce' },
+		{ name: 'Business Dealer ecommerce site', },
 	]
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-	const timings = makeTimings('root loader')
-	const userId = await time(() => getUserId(request), {
-		timings,
-		type: 'getUserId',
-		desc: 'getUserId in root',
-	})
-
-	const user = userId
-		? await time(
-				() =>
-					prisma.user.findUnique({
-						select: {
-							id: true,
-							name: true,
-							username: true,
-							image: { select: { objectKey: true } },
-							roles: {
-								select: {
-									name: true,
-									permissions: {
-										select: { entity: true, action: true, access: true },
-									},
-								},
-							},
-						},
-						where: { id: userId },
-					}),
-				{ timings, type: 'find user', desc: 'find user in root' },
-			)
-		: null
-	if (userId && !user) {
-		console.info('something weird happened')
-		// something weird happened... The user is authenticated but we can't find
-		// them in the database. Maybe they were deleted? Let's log them out.
-		await logout({ request, redirectTo: '/' })
-	}
+export async function loader({ request, context }: Route.LoaderArgs) {
+	const user = context.get(userContext);
 	const { toast, headers: toastHeaders } = await getToast(request)
-	const honeyProps = await honeypot.getInputProps()
 
 	return data(
 		{
@@ -121,11 +75,9 @@ export async function loader({ request }: Route.LoaderArgs) {
 			},
 			ENV: getEnv(),
 			toast,
-			honeyProps,
 		},
 		{
 			headers: combineHeaders(
-				{ 'Server-Timing': timings.toString() },
 				toastHeaders,
 			),
 		},
@@ -160,14 +112,8 @@ function Document({
 			</head>
 			<body className="bg-background text-foreground">
 				{children}
-				<script
-					nonce={nonce}
-					dangerouslySetInnerHTML={{
-						__html: `window.ENV = ${JSON.stringify(env)}`,
-					}}
-				/>
-				<ScrollRestoration nonce={nonce} />
-				<Scripts nonce={nonce} />
+				<ScrollRestoration  />
+				<Scripts  />
 			</body>
 		</html>
 	)
@@ -176,10 +122,9 @@ function Document({
 export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
 	const data = useLoaderData<typeof loader | null>()
-	const nonce = useNonce()
-	const theme = useOptionalTheme()
+
 	return (
-		<Document nonce={nonce} theme={theme} env={data?.ENV}>
+		<Document  env={data?.ENV}>
 			{children}
 		</Document>
 	)
@@ -188,7 +133,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 function App() {
 	const data = useLoaderData<typeof loader>()
 	const user = useOptionalUser()
-	const theme = useTheme()
 	const matches = useMatches()
 	const isOnSearchPage = matches.find((m) => m.id === 'routes/users/index')
 	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
@@ -199,34 +143,51 @@ function App() {
 			optimizerEndpoint="/resources/images"
 			getSrc={getImgSrc}
 		>
-			<div className="flex min-h-screen flex-col justify-between">
-				<header className="container py-6">
-					<nav className="flex flex-wrap items-center justify-between gap-4 sm:flex-nowrap md:gap-8">
-						<Logo />
-						<div className="ml-auto hidden max-w-sm flex-1 sm:block">
-							{searchBar}
-						</div>
-						<div className="flex items-center gap-10">
-							{user ? (
-								<UserDropdown />
-							) : (
-								<Button asChild variant="default" size="lg">
-									<Link to="/login">Log In</Link>
-								</Button>
-							)}
-						</div>
-						<div className="block w-full sm:hidden">{searchBar}</div>
-					</nav>
-				</header>
-
-				<div className="flex flex-1 flex-col">
-					<Outlet />
-				</div>
-
-				<div className="container flex justify-between pb-5">
-					<Logo />
-					<ThemeSwitch userPreference={data.requestInfo.userPrefs.theme} />
-				</div>
+			<div className='flex min-h-dvh w-full'>
+				<SidebarProvider defaultOpen={false}>
+					<Sidebar>
+						<SidebarHeader className="p-0 gap-0">
+							{/********* Overlay for Logo to have same background as the one in the AppHeader ******/}
+							<div className="flex item-center z-53 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b justify-left px-12 py-4">
+								<OutletLogoSVG className="h-8"/>
+							</div>
+						</SidebarHeader>
+					</Sidebar>
+					<div className='flex flex-1 flex-col'>
+						<AppHeader />
+						<main className='mx-auto size-full max-w-7xl flex-1 px-2 py-0 sm:px-4'>
+							{/* Main content */}
+							<section className="grid grid-cols gap-10 row-start-2 col-start-1">
+								<Outlet />
+							</section>
+						</main>
+						<footer>
+							<div className='text-muted-foreground mx-auto flex size-full max-w-7xl items-center justify-between gap-3 px-4 py-3 max-sm:flex-col sm:gap-6 sm:px-6'>
+								<p className='text-sm text-balance max-sm:text-center'>
+									{`©${new Date().getFullYear()}`}{' '}
+									<a href='#' className='text-primary'>
+										Shadcn/studio
+									</a>
+									, Made for better web design
+								</p>
+								<div className='flex items-center gap-5'>
+									<a href='#'>
+										<FacebookIcon className='size-4' />
+									</a>
+									<a href='#'>
+										<InstagramIcon className='size-4' />
+									</a>
+									<a href='#'>
+										<LinkedinIcon className='size-4' />
+									</a>
+									<a href='#'>
+										<TwitterIcon className='size-4' />
+									</a>
+								</div>
+							</div>
+						</footer>
+					</div>
+				</SidebarProvider>
 			</div>
 			<EpicToaster closeButton position="top-center" theme={theme} />
 			<EpicProgress />
@@ -234,25 +195,10 @@ function App() {
 	)
 }
 
-function Logo() {
-	return (
-		<Link to="/" className="group grid leading-snug">
-			<span className="font-light transition group-hover:-translate-x-1">
-				epic
-			</span>
-			<span className="font-bold transition group-hover:translate-x-1">
-				notes
-			</span>
-		</Link>
-	)
-}
-
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	return (
-		<HoneypotProvider {...data.honeyProps}>
 			<App />
-		</HoneypotProvider>
 	)
 }
 

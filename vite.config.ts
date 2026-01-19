@@ -8,6 +8,7 @@ import { reactRouterDevTools } from 'react-router-devtools'
 import { defineConfig } from 'vite'
 import { envOnlyMacros } from 'vite-env-only'
 import { iconsSpritesheet } from 'vite-plugin-icons-spritesheet'
+import path from "path"
 
 const MODE = process.env.NODE_ENV
 
@@ -57,6 +58,11 @@ export default defineConfig((config) => ({
 			? sentryReactRouter(sentryConfig, config)
 			: null,
 	],
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, "./app"),
+		},
+	},
 	test: {
 		include: ['./app/**/*.test.{ts,tsx}'],
 		setupFiles: ['./tests/setup/setup-test-env.ts'],
