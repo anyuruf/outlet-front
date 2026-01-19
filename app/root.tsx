@@ -17,7 +17,6 @@ import {
 import { type Route } from './+types/root.ts'
 import { GeneralErrorBoundary } from '@/components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
-import { SearchBar } from '@/components/search-bar.tsx'
 import { useToast } from '@/components/toaster.tsx'
 import { href as iconsHref } from '@/components/ui/icon.tsx'
 import { EpicToaster } from '@/components/ui/sonner.tsx'
@@ -30,7 +29,6 @@ import { pipeHeaders } from '@/utils/headers.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from '@/utils/misc.tsx'
 import { type Theme, getTheme } from '@/utils/theme.server.ts'
 import { getToast } from '@/utils/toast.server.ts'
-import { useOptionalUser } from '@/utils/user.ts'
 import { authMiddleware, userContext } from "@/middleware/auth";
 import React from "react";
 
@@ -188,6 +186,7 @@ function App() {
 		</OpenImgContextProvider>
 	)
 }
+//Todo Check EpicToaster theme configuration out above
 
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
