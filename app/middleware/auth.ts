@@ -1,17 +1,21 @@
 // app/middleware/auth.ts
 import { redirect, createContext } from "react-router";
-import type { Route } from "./+types/root";
+import type { Route} from "./+types/root";
+import {UserAccount} from "../../types/user.account.ts";
+import {getAccount} from "@/utils/fetch.http.ts";
 
-export const userContext = createContext<User | null>();
+
+export const userContext = createContext<UserAccount | null>();
 
 export const authMiddleware: Route.Middleware = async ({
-                   request, context, next }) => {
-    const user = await getUserFromSession(request);
+                  context, next }: Route.LoaderFunctionArgs) => {
+    const userAccount = await getAccount();
 
-    if (!user) {
+    if (!userAccount) {
         throw redirect("/login");
     }
 
-    context.set(userContext, user);
+    context.set(userContext, userAccount);
     return next();
 };
+

@@ -1,18 +1,19 @@
 import { useRouteLoaderData } from 'react-router'
 import { type loader as rootLoader } from '#app/root.tsx'
+import { type UserAccount} from "../../types/user.account.ts";
 
 function isUser(
-	user: any,
-): user is Awaited<ReturnType<typeof rootLoader>>['data']['user'] {
-	return user && typeof user === 'object' && typeof user.id === 'string'
+	userAccount: UserAccount,
+): userAccount is Awaited<ReturnType<typeof rootLoader>>['data']['userAccount'] {
+	return userAccount && typeof userAccount === 'object' && typeof userAccount.userId === 'string'
 }
 
 export function useOptionalUser() {
 	const data = useRouteLoaderData<typeof rootLoader>('root')
-	if (!data || !isUser(data.user)) {
+	if (!data || !isUser(data.userAccount)) {
 		return undefined
 	}
-	return data.user
+	return data.userAccount
 }
 
 export function useUser() {
@@ -25,46 +26,18 @@ export function useUser() {
 	return maybeUser
 }
 
-type Action = 'create' | 'read' | 'update' | 'delete'
-type Entity = 'user' | 'note'
-type Access = 'own' | 'any' | 'own,any' | 'any,own'
-export type PermissionString =
-	| `${Action}:${Entity}`
-	| `${Action}:${Entity}:${Access}`
-
-export function parsePermissionString(permissionString: PermissionString) {
-	const [action, entity, access] = permissionString.split(':') as [
-		Action,
-		Entity,
-		Access | undefined,
-	]
-	return {
-		action,
-		entity,
-		access: access ? (access.split(',') as Array<Access>) : undefined,
-	}
-}
-
 export function userHasPermission(
-	user: Pick<ReturnType<typeof useUser>, 'roles'> | null | undefined,
-	permission: PermissionString,
+	userAccount: UserAccount | undefined |null,
+	permission: string
 ) {
-	if (!user) return false
-	const { action, entity, access } = parsePermissionString(permission)
-	return user.roles.some((role) =>
-		role.permissions.some(
-			(permission) =>
-				permission.entity === entity &&
-				permission.action === action &&
-				(!access || access.includes(permission.access)),
-		),
-	)
+	if (!userAccount) return false
+	return userAccount.authorities.includes(permission)
 }
 
 export function userHasRole(
-	user: Pick<ReturnType<typeof useUser>, 'roles'> | null,
+	userAccount: UserAccount| undefined |null,
 	role: string,
 ) {
-	if (!user) return false
-	return user.roles.some((r) => r.name === role)
+	if (!userAccount) return false
+	return userAccount.authorities.includes(role)
 }

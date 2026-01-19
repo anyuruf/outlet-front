@@ -1,14 +1,12 @@
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
-	Link,
 	Links,
 	Meta,
 	Outlet,
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
-	useMatches,
 } from 'react-router'
 import {
 	FacebookIcon,
@@ -59,12 +57,12 @@ export const meta: Route.MetaFunction = () => {
 }
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-	const user = context.get(userContext);
+	const userAccount = context.get(userContext);
 	const { toast, headers: toastHeaders } = await getToast(request)
 
 	return data(
 		{
-			user,
+			userAccount,
 			requestInfo: {
 				hints: getHints(request),
 				origin: getDomainUrl(request),
@@ -132,10 +130,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 function App() {
 	const data = useLoaderData<typeof loader>()
-	const user = useOptionalUser()
-	const matches = useMatches()
-	const isOnSearchPage = matches.find((m) => m.id === 'routes/users/index')
-	const searchBar = isOnSearchPage ? null : <SearchBar status="idle" />
 	useToast(data.toast)
 
 	return (
