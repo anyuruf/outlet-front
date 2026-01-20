@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Switch } from '@/components/ui/switch'
 import { Moon, Sun } from "lucide-react";
-import { Theme, useTheme } from "remix-themes";
+import { useTheme } from '@/utils/theme.server'
 
-const ThemeSwitch = () => {
-  const [theme, setTheme] = useTheme();
-  const [checked, setChecked] = useState(theme !== Theme.LIGHT);
+const ThemeSwitch = (request : Request) => {
+  const { theme, setTheme } = useTheme(request);
+  // @ts-ignore
+  const [checked, setChecked] = useState(theme !== 'light');
 
   useEffect(() => {
-    setTheme(checked ? Theme.DARK : Theme.LIGHT);
+    setTheme(checked ? 'dark' : 'light');
   }, [checked, setTheme]);
 
   return (

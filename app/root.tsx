@@ -27,10 +27,13 @@ import { ClientHintCheck, getHints } from '@/utils/client-hints.tsx'
 import { getEnv } from '@/utils/env.server.ts'
 import { pipeHeaders } from '@/utils/headers.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from '@/utils/misc.tsx'
-import { type Theme, getTheme } from '@/utils/theme.server.ts'
+import {useTheme, type Theme} from '@/utils/theme.server.ts'
 import { getToast } from '@/utils/toast.server.ts'
 import { authMiddleware, userContext } from "@/middleware/auth";
 import React from "react";
+import {HoneypotProvider} from "remix-utils/honeypot/react";
+import { useNonce } from './utils/nonce-provider.ts'
+import {honeypot} from "@/utils/honeypot.server.ts";
 
 
 export  const  middleware: Route.MiddlewareFunction[] = [authMiddleware];
@@ -57,6 +60,9 @@ export const meta: Route.MetaFunction = () => {
 export async function loader({ request, context }: Route.LoaderArgs) {
 	const userAccount = context.get(userContext);
 	const { toast, headers: toastHeaders } = await getToast(request)
+	const { theme } = useTheme(request)
+
+	const honeyProps = await honeypot.getInputProps()
 
 	return data(
 		{
@@ -66,11 +72,12 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 				origin: getDomainUrl(request),
 				path: new URL(request.url).pathname,
 				userPrefs: {
-					theme: getTheme(request),
+					theme: theme(request),
 				},
 			},
 			ENV: getEnv(),
 			toast,
+			honeyProps,
 		},
 		{
 			headers: combineHeaders(
@@ -108,8 +115,14 @@ function Document({
 			</head>
 			<body className="bg-background text-foreground">
 				{children}
-				<ScrollRestoration  />
-				<Scripts  />
+				<script
+				nonce={nonce}
+				dangerouslySetInnerHTML={{
+					__html: `window.ENV = ${JSON.stringify(env)}`,
+				}}
+				/>
+				<ScrollRestoration  nonce={nonce}/>
+				<Scripts  nonce={nonce}/>
 			</body>
 		</html>
 	)
@@ -118,9 +131,10 @@ function Document({
 export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
 	const data = useLoaderData<typeof loader | null>()
+	const nonce = useNonce()
 
 	return (
-		<Document  env={data?.ENV}>
+		<Document nonce={nonce} env={data?.ENV}>
 			{children}
 		</Document>
 	)
@@ -181,7 +195,7 @@ function App() {
 					</div>
 				</SidebarProvider>
 			</div>
-			<EpicToaster closeButton position="top-center" theme={theme} />
+			<EpicToaster closeButton position="top-center" theme={data?.requestInfo?.userPrefs?.theme} />
 			<EpicProgress />
 		</OpenImgContextProvider>
 	)
@@ -191,7 +205,9 @@ function App() {
 function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	return (
+		<HoneypotProvider {...data.honeyProps}>
 			<App />
+		</HoneypotProvider>
 	)
 }
 
