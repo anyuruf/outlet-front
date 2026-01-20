@@ -290,3 +290,31 @@ export async function downloadFile(url: string, retries: number = 0) {
 		return downloadFile(url, retries + 1)
 	}
 }
+
+
+export function useAutoplay(carouselApi) {
+	const [isPlaying, setIsPlaying] = useState(true);
+
+	useEffect(() => {
+		if (!carouselApi) return;
+
+		const handlePlay = () => setIsPlaying(true);
+		const handleStop = () => setIsPlaying(false);
+
+		carouselApi
+			.on("autoplay:play", handlePlay)
+			.on("autoplay:stop", handleStop);
+
+		return () => {
+			carouselApi
+				.off("autoplay:play", handlePlay)
+				.off("autoplay:stop", handleStop);
+		};
+	}, [carouselApi]);
+
+	return {
+		isPlaying,
+		setIsPlaying,
+	};
+}
+

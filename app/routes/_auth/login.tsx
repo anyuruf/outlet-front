@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
+import {OUTLET_PROVIDER_NAME, ProviderConnectionForm} from "@/utils/connections.tsx";
+import {useSearchParams} from "react-router";
 
 export default function LoginPage() {
-    const handleLogin = () => {
-        // Full redirect is REQUIRED for OAuth2
-        window.location.href = "/oauth2/authorization/oidc";
-    };
+    const [searchParams] = useSearchParams()
+    const redirectTo = searchParams.get('redirectTo')
+
 
     return (
         <main
@@ -31,13 +31,11 @@ export default function LoginPage() {
                     </p>
                 </header>
 
-                <Button
-                    type="button"
-                    className="w-full"
-                    onClick={handleLogin}
-                >
-                    Continue To Identity Provider
-                </Button>
+                <ProviderConnectionForm
+                    type="Login"
+                    providerName={OUTLET_PROVIDER_NAME}
+                    redirectTo={redirectTo}
+                />
             </section>
         </main>
     );

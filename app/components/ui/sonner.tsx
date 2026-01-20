@@ -1,6 +1,7 @@
 import { Toaster as Sonner } from 'sonner'
+import { ComponentProps} from "react";
 
-type ToasterProps = React.ComponentProps<typeof Sonner>
+type ToasterProps = ComponentProps<typeof Sonner>
 
 const EpicToaster = ({ theme, ...props }: ToasterProps) => {
 	return (
