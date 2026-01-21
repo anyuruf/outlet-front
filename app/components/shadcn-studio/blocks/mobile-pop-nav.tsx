@@ -5,7 +5,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from "@/components/ui/button";
-import HamburgerIconSVG from "@/components/HomePage/Header/HamburgerIconSVG";
+import HamburgerIconSVG from "@/components/headers/HamburgerIconSVG";
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from "@/components/ui/navigation-menu";
 
 

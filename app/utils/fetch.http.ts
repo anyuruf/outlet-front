@@ -1,5 +1,5 @@
 import { SERVER_BACKEND_URL } from "./constants";
-import {UserAccount} from "../../types/user.account.ts";
+import type {UserAccount} from "../../types/user.account.ts";
 
 export class HttpError extends Error {
     constructor(

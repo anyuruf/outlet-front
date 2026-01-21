@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigation } from 'react-router'
 import { useSpinDelay } from 'spin-delay'
 import { cn } from '#app/utils/misc.tsx'
-import { Icon } from './ui/icon.tsx'
 
 function EpicProgress() {
 	const transition = useNavigation()
@@ -48,12 +47,7 @@ function EpicProgress() {
 			/>
 			{delayedPending && (
 				<div className="absolute flex items-center justify-center">
-					<Icon
-						name="update"
-						size="md"
-						className="text-foreground m-1 animate-spin"
-						aria-hidden
-					/>
+					<p>IconLived</p>
 				</div>
 			)}
 		</div>

@@ -1,7 +1,7 @@
 import { PauseIcon, PlayIcon, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from "@/components/ui/button";
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils/misc';
 
 interface Props {
   autoplay: unknown

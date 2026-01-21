@@ -5,12 +5,12 @@ import { type UserAccount} from "../../types/user.account.ts";
 function isUser(
 	userAccount: UserAccount,
 ): userAccount is Awaited<ReturnType<typeof rootLoader>>['data']['userAccount'] {
-	return userAccount && typeof userAccount === 'object' && typeof userAccount.userId === 'string'
+	return userAccount && typeof userAccount === 'object' && typeof userAccount.id === 'string'
 }
 
 export function useOptionalUser() {
 	const data = useRouteLoaderData<typeof rootLoader>('root')
-	if (!data || !isUser(data.userAccount)) {
+	if (!data || !isUser(data?.userAccount)) {
 		return undefined
 	}
 	return data.userAccount

@@ -23,4 +23,4 @@ export function useTheme(request: Request) {
 
 }
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'system'

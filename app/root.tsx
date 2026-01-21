@@ -1,7 +1,11 @@
 import { OpenImgContextProvider } from 'openimg/react'
 import {
 	data,
-	Links,
+	Links, type LoaderFunctionArgs,
+	type MiddlewareFunction,
+	type LinksFunction,
+	type MetaFunction,
+	type HeadersFunction,
 	Meta,
 	Outlet,
 	Scripts,
@@ -14,11 +18,9 @@ import {
 	LinkedinIcon,
 	TwitterIcon,
 } from 'lucide-react'
-import { type Route } from './+types/root.ts'
 import { GeneralErrorBoundary } from '@/components/error-boundary.tsx'
 import { EpicProgress } from './components/progress-bar.tsx'
 import { useToast } from '@/components/toaster.tsx'
-import { href as iconsHref } from '@/components/ui/icon.tsx'
 import { EpicToaster } from '@/components/ui/sonner.tsx'
 import { Sidebar, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar'
 import { AppHeader } from '@/components/headers/AppHeader'
@@ -36,12 +38,11 @@ import { useNonce } from './utils/nonce-provider.ts'
 import {honeypot} from "@/utils/honeypot.server.ts";
 
 
-export  const  middleware: Route.MiddlewareFunction[] = [authMiddleware];
+export  const  middleware: MiddlewareFunction[] = [authMiddleware];
 
-export const links: Route.LinksFunction = () => {
+export const links: LinksFunction = () => {
 	return [
 		// Preload svg sprite as a resource to avoid render blocking
-		{ rel: 'preload', href: iconsHref, as: 'image' },
 		{
 			rel: 'icon',
 			href: '/favicon.ico',
@@ -50,14 +51,14 @@ export const links: Route.LinksFunction = () => {
 	].filter(Boolean)
 }
 
-export const meta: Route.MetaFunction = () => {
+export const meta: MetaFunction = () => {
 	return [
 		{ title: 'Outlet iCommerce' },
 		{ name: 'Business Dealer ecommerce site', },
 	]
 }
 
-export async function loader({ request, context }: Route.LoaderArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
 	const userAccount = context.get(userContext);
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const { theme } = useTheme(request)
@@ -87,7 +88,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 	)
 }
 
-export const headers: Route.HeadersFunction = pipeHeaders
+export const headers: HeadersFunction = pipeHeaders
 
 function Document({
 	children,
