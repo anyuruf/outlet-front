@@ -1,6 +1,6 @@
 import * as React from "react";
 import { CSSProperties } from "react";
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/misc"
 
 const OutletLogoSVG = ({ className, ...props }: React.SVGAttributes<SVGElement>) => (
   <svg

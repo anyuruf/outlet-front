@@ -3,7 +3,7 @@ import * as React from 'react'
 import { motion, type HTMLMotionProps } from 'motion/react'
 import type { VariantProps } from 'class-variance-authority'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/misc'
 import { buttonVariants } from '@/components/ui/button'
 
 interface BounceButtonProps extends HTMLMotionProps<'button'>, VariantProps<typeof buttonVariants> {

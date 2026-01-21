@@ -11,34 +11,9 @@ import ThemeSwitch from "@/components/headers/switch-toggle";
 import MobilePopNav from "@/components/shadcn-studio/blocks/mobile-pop-nav";
 import DesktopNav from "@/components/shadcn-studio/blocks/desktop-nav";
 import ExpandableSearch from "@/components/headers/ExpandableSearch";
+import type {NavbarProps} from "../../../types/navigation";
+import { defaultNavigationLinks } from "@/utils/constants"
 
-
-export interface NavbarNavItem {
-  href?: string;
-  label: string;
-}
-
-export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
-  logo?: React.ReactNode;
-  logoHref?: string;
-  navigationLinks?: NavbarNavItem[];
-  userName?: string;
-  userEmail?: string;
-  userAvatar?: string;
-  notificationCount?: number;
-  onNavItemClick?: (href: string) => void;
-  onInfoItemClick?: (item: string) => void;
-  onNotificationItemClick?: (item: string) => void;
-  onUserItemClick?: (item: string) => void;
-}
-
-// Default navigation links
-const defaultNavigationLinks: NavbarNavItem[] = [
-  { href: '#', label: 'Home' },
-  { href: '#', label: 'Great Deals' },
-  { href: '#', label: 'Sell' },
-  { href: '#', label: 'My Outlet' },
-];
 
 export const AppHeader = React.forwardRef<HTMLElement, NavbarProps>(
   (
@@ -47,14 +22,15 @@ export const AppHeader = React.forwardRef<HTMLElement, NavbarProps>(
       logo = <OutletLogoSVG />,
       logoHref = '/',
       navigationLinks = defaultNavigationLinks,
-      userName = 'anyuruf',
-      userEmail = 'anyuruf@example.com',
+      userName,
+      userEmail,
       userAvatar,
       notificationCount = 8,
       onNavItemClick,
       onInfoItemClick,
       onNotificationItemClick,
       onUserItemClick,
+      request,
       ...props
     },
     ref
@@ -95,11 +71,6 @@ export const AppHeader = React.forwardRef<HTMLElement, NavbarProps>(
       }
     }, [ref]);
 
-    const user = {
-      name: "anyuruf",
-      email: "anyuruf@anyuruf.net",
-      avatar: "https://avatars.githubusercontent.com/u/46653783?v=4"
-    }
 
     return (
       <header
@@ -155,7 +126,7 @@ export const AppHeader = React.forwardRef<HTMLElement, NavbarProps>(
             <div className="inline-flex gap-1 items-center">
               {/* ThemeSwitch */}
 
-              <ThemeSwitch />
+              <ThemeSwitch request={request}/>
 
               {/* Info menu */}
               <InfoMenu onItemClick={onInfoItemClick} />
@@ -165,7 +136,7 @@ export const AppHeader = React.forwardRef<HTMLElement, NavbarProps>(
                 notificationCount={notificationCount}
                 onItemClick={onNotificationItemClick}
               />
-              <UserMenu userName={user.name} userEmail={user.email} userAvatar={user.avatar}/>
+              <UserMenu userName={userName} userEmail={userEmail} userAvatar={userAvatar}/>
             </div>
           </div>
         }
