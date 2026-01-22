@@ -4,10 +4,7 @@ import {
     } from "react-router";
 import type {UserAccount} from "../../types/user.account.ts";
 
-const dbContext = createContext<UserAccount | null>();
+export const userContext = createContext<UserAccount | null>();
+export const contextProvider = new RouterContextProvider();
 
-function getLoadContext(req, res) {
-      const context = new RouterContextProvider();
-      context.set(dbContext, createDb());
-      return context;
-}
+
