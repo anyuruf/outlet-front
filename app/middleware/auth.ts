@@ -1,8 +1,9 @@
 // app/middleware/auth.ts
 import {redirect} from "react-router";
 import type { Route} from "./+types/root";
+
 import {getAccount} from "@/utils/fetch.http.ts";
-import {userContext, contextProvider} from "@/middleware/context.ts";
+import {contextProvider, userContext} from "@/middleware/context.ts";
 
 
 

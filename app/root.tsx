@@ -31,11 +31,12 @@ import { pipeHeaders } from '@/utils/headers.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from '@/utils/misc.tsx'
 import {useTheme, type Theme} from '@/utils/theme.server.ts'
 import { getToast } from '@/utils/toast.server.ts'
-import { authMiddleware, userContext } from "@/middleware/auth";
+import { authMiddleware } from "@/middleware/auth";
 import React from "react";
 import {HoneypotProvider} from "remix-utils/honeypot/react";
 import { useNonce } from './utils/nonce-provider.ts'
 import {honeypot} from "@/utils/honeypot.server.ts";
+import {contextProvider, userContext} from "@/middleware/context.ts";
 
 
 export  const  middleware: MiddlewareFunction[] = [authMiddleware];
@@ -58,7 +59,7 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
+export async function loader({ request, context}: LoaderFunctionArgs) {
 	const userAccount = context.get(userContext);
 	const { toast, headers: toastHeaders } = await getToast(request)
 	const { theme } = useTheme(request)
