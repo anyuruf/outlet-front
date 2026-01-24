@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "react-router build",
-    "dev": "react-router dev",
+    "dev": "react-router dev --port 9000",
     "format": "prettier --write .",
     "lint": "eslint .",
     "setup": "npm run build && prisma migrate deploy && prisma generate --sql && playwright install",
