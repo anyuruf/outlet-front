@@ -1,22 +1,25 @@
 // app/middleware/auth.ts
 import {redirect} from "react-router";
 import type { Route} from "./+types/root";
+
 import {getAccount} from "@/utils/fetch.http.ts";
-import {userContext, contextProvider} from "@/middleware/context.ts";
+import { userContext} from "@/middleware/context.ts";
 
 
+export const authMiddleware: Route.Middleware = async ({next, context }: Route.LoaderFunctionArgs) => {
+    // SSR phase: do not force auth
+    if (typeof window === "undefined") {
+        return next;
+    }
 
-
-
-export const authMiddleware: Route.Middleware = async ({
-                  context, next }: Route.LoaderFunctionArgs) => {
     const userAccount = await getAccount();
 
     if (!userAccount) {
-        throw redirect("/login");
+        // Browser only → send to gateway OAuth
+        throw redirect("/oauth2/authorization/oidc");
     }
 
-    contextProvider.set(userContext, userAccount);
-    return next();
+    context.set(userContext, userAccount);
+    return next;
 };
 
