@@ -1,12 +1,20 @@
 import { PassThrough } from "node:stream";
 
-import type { EntryContext, RouterContextProvider} from "react-router";
+import {
+  createStaticHandler,
+  createStaticRouter,
+  EntryContext,
+  RouterContextProvider,
+  RouterProvider
+} from "react-router";
 import { createReadableStreamFromReadable } from "@react-router/node";
 import { ServerRouter } from "react-router";
 import { isbot } from "isbot";
-import type { RenderToPipeableStreamOptions } from "react-dom/server";
+import {RenderToPipeableStreamOptions, renderToString} from "react-dom/server";
 import { renderToPipeableStream } from "react-dom/server";
 import {getEnv} from "@/utils/env.server";
+import {contextProvider, userContext} from "@/middleware/context.ts";
+
 
 export const streamTimeout = 5_000;
 
@@ -14,6 +22,10 @@ global.ENV = getEnv()
 
 const MODE = process.env.NODE_ENV ?? 'development'
 
+export async function getLoadContext () {
+  contextProvider.set(userContext, null)
+  return contextProvider.get(userContext)
+}
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -23,7 +35,9 @@ export default function handleRequest(
   // If you have middleware enabled:
   loadContext: RouterContextProvider
 ) {
-  // https://httpwg.org/specs/rfc9110.html#HEAD
+
+
+// https://httpwg.org/specs/rfc9110.html#HEAD
   if (request.method.toUpperCase() === "HEAD") {
     return new Response(null, {
       status: responseStatusCode,

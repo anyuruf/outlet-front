@@ -3,10 +3,10 @@ import {redirect} from "react-router";
 import type { Route} from "./+types/root";
 
 import {getAccount} from "@/utils/fetch.http.ts";
-import {contextProvider, userContext} from "@/middleware/context.ts";
+import { userContext} from "@/middleware/context.ts";
 
 
-export const authMiddleware: Route.Middleware = async ({next }: Route.LoaderFunctionArgs) => {
+export const authMiddleware: Route.Middleware = async ({next, context }: Route.LoaderFunctionArgs) => {
     // SSR phase: do not force auth
     if (typeof window === "undefined") {
         return next;
@@ -19,7 +19,7 @@ export const authMiddleware: Route.Middleware = async ({next }: Route.LoaderFunc
         throw redirect("/oauth2/authorization/oidc");
     }
 
-    contextProvider.set(userContext, userAccount);
+    context.set(userContext, userAccount);
     return next;
 };
 

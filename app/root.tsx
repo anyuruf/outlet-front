@@ -33,7 +33,7 @@ import { authMiddleware } from "@/middleware/auth";
 import React from "react";
 import {HoneypotProvider} from "remix-utils/honeypot/react";
 import {honeypot} from "@/utils/honeypot.server.ts";
-import {contextProvider, userContext} from "@/middleware/context.ts";
+import {userContext} from "@/middleware/context.ts";
 import {PreventFlashOnWrongTheme, Theme, ThemeProvider} from "remix-themes";
 import { themeSessionResolver } from "@/utils/sessions.server";
 
@@ -66,8 +66,7 @@ export async function loader({ request,context}: LoaderFunctionArgs) {
 	const honeyProps = await honeypot.getInputProps()
 
 	return data(
-		{
-			userAccount,
+		{	userAccount,
 			requestInfo: {
 				origin: getDomainUrl(request),
 				path: new URL(request.url).pathname,
