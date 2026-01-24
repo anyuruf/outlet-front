@@ -25,18 +25,17 @@ import { EpicToaster } from '@/components/ui/sonner.tsx'
 import { Sidebar, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar'
 import { AppHeader } from '@/components/headers/AppHeader'
 import OutletLogoSVG from '@/components/headers/OutletLogoSVG'
-import { ClientHintCheck, getHints } from '@/utils/client-hints.tsx'
 import { getEnv } from '@/utils/env.server.ts'
 import { pipeHeaders } from '@/utils/headers.server.ts'
 import { combineHeaders, getDomainUrl, getImgSrc } from '@/utils/misc.tsx'
-import {useTheme, type Theme} from '@/utils/theme.server.ts'
 import { getToast } from '@/utils/toast.server.ts'
 import { authMiddleware } from "@/middleware/auth";
 import React from "react";
 import {HoneypotProvider} from "remix-utils/honeypot/react";
-import { useNonce } from './utils/nonce-provider.ts'
 import {honeypot} from "@/utils/honeypot.server.ts";
 import {contextProvider, userContext} from "@/middleware/context.ts";
+import {PreventFlashOnWrongTheme, Theme, ThemeProvider} from "remix-themes";
+import { themeSessionResolver } from "@/utils/sessions.server";
 
 
 export  const  middleware: MiddlewareFunction[] = [authMiddleware];
@@ -59,10 +58,10 @@ export const meta: MetaFunction = () => {
 	]
 }
 
-export async function loader({ request, context}: LoaderFunctionArgs) {
+export async function loader({ request,context}: LoaderFunctionArgs) {
 	const userAccount = context.get(userContext);
 	const { toast, headers: toastHeaders } = await getToast(request)
-	const { theme } = useTheme(request)
+	const { getTheme } = await themeSessionResolver(request)
 
 	const honeyProps = await honeypot.getInputProps()
 
@@ -70,11 +69,10 @@ export async function loader({ request, context}: LoaderFunctionArgs) {
 		{
 			userAccount,
 			requestInfo: {
-				hints: getHints(request),
 				origin: getDomainUrl(request),
 				path: new URL(request.url).pathname,
 				userPrefs: {
-					theme: theme(request),
+					theme: getTheme(),
 				},
 			},
 			ENV: getEnv(),
@@ -93,38 +91,30 @@ export const headers: HeadersFunction = pipeHeaders
 
 function Document({
 	children,
-	nonce,
-	theme = 'light',
-	env = {},
+	env,
+	theme
 }: {
 	children: React.ReactNode
-	nonce: string
-	theme?: Theme
+	theme?: Theme | null
 	env?: Record<string, string | undefined>
 }) {
 	const allowIndexing = ENV.ALLOW_INDEXING !== 'false'
 	return (
-		<html lang="en" className={`${theme} h-full overflow-x-hidden`}>
+		<html lang="en">
 			<head>
-				<ClientHintCheck nonce={nonce} />
 				<Meta />
 				<meta charSet="utf-8" />
+				<PreventFlashOnWrongTheme ssrTheme={Boolean(theme)} />
 				<meta name="viewport" content="width=device-width,initial-scale=1" />
 				{allowIndexing ? null : (
 					<meta name="robots" content="noindex, nofollow" />
 				)}
 				<Links />
 			</head>
-			<body className="bg-background text-foreground">
+			<body>
 				{children}
-				<script
-				nonce={nonce}
-				dangerouslySetInnerHTML={{
-					__html: `window.ENV = ${JSON.stringify(env)}`,
-				}}
-				/>
-				<ScrollRestoration  nonce={nonce}/>
-				<Scripts  nonce={nonce}/>
+				<ScrollRestoration />
+				<Scripts  />
 			</body>
 		</html>
 	)
@@ -132,13 +122,14 @@ function Document({
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	// if there was an error running the loader, data could be missing
-	const data = useLoaderData<typeof loader | null>()
-	const nonce = useNonce()
+	const data = useLoaderData<typeof loader>()
 
 	return (
-		<Document nonce={nonce} env={data?.ENV}>
-			{children}
-		</Document>
+		<ThemeProvider specifiedTheme={data?.requestInfo?.userPrefs.theme} themeAction="/actions/set-theme">
+			<Document theme={data?.requestInfo?.userPrefs?.theme} >
+				{children}
+			</Document>
+		</ThemeProvider>
 	)
 }
 
@@ -206,7 +197,7 @@ function AppWithProviders() {
 	const data = useLoaderData<typeof loader>()
 	return (
 		<HoneypotProvider {...data.honeyProps}>
-			<App />
+				<App />
 		</HoneypotProvider>
 	)
 }

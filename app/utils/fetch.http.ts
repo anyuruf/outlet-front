@@ -1,4 +1,4 @@
-import { SERVER_BACKEND_URL } from "./constants";
+import { SERVER_BACKEND_BASE_URL } from "./constants";
 import type {UserAccount} from "../../types/user.account.ts";
 
 export class HttpError extends Error {
@@ -14,7 +14,7 @@ export async function apiFetch<T>(
     path: string,
     init?: RequestInit
 ): Promise<T> {
-    const response = await fetch(`${SERVER_BACKEND_URL}${path}`, {
+    const response = await fetch(`${SERVER_BACKEND_BASE_URL}${path}`, {
         credentials: "include", // IMPORTANT for Spring Security / Keycloak
         headers: {
             "Content-Type": "application/json",
